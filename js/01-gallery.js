@@ -1,42 +1,48 @@
 import { galleryItems } from "./gallery-items.js";
 // Change code below this line
 
-const galleryBoxRef = document.querySelector('.gallery');
-const galleryMarkup = createGalleryMarkup(galleryItems);
+const listRef = document.querySelector('.gallery');
+const itemsMarkup = onGalerryMarkup(galleryItems);
 
-galleryBoxRef.insertAdjacentHTML('afterbegin', galleryMarkup);
+listRef.insertAdjacentHTML('afterbegin', itemsMarkup);
 
-galleryBoxRef.addEventListener('click', onGalleryImageClick)
+listRef.addEventListener('click', onImageOpen)
 
-function createGalleryMarkup(items) { 
-  return items.map(({original, preview, description }) => {
-    return `
-      <div class="gallery__item">
-        <a class="gallery__link" href="${original}">
-          <img
-            class="gallery__image"
-            src="${preview}"
-            data-source="${original}"
-            alt="${description}"
-          />
-        </a>
-      </div>
-   `
+function onGalerryMarkup (galleryItems) {
+  return galleryItems.map(({ original, preview, description }) => {
+    return `<li class="gallery__item">
+      <a class="gallery__link" href="${original}">
+        <img
+          class="gallery__image"
+          src="${preview}"
+          data-source="${original}"
+          alt="${description}"
+        />
+      </a>
+    </li>`
+    
   }).join('');
-};
+}
 
-function onGalleryImageClick(evt) {
-  evt.preventDefault();
-  
-  const originalImgUrl = evt.target.dataset.source;  
-  
-  basicLightbox.create(`
-		<img width="860" src="${originalImgUrl}">
-	`).show()
+function onImageOpen(e) {
+  e.preventDefault();
+  const imageUrl = e.target.dataset.source;
 
-  if (!evt.target.classList.contains('gallery__image')) {
-      return
-    }
-  
+  const instance = basicLightbox.create(`
+    <img src="${imageUrl}" width="800" height="600">`, {
+    onShow: (instance) => {
+      addEventListener('keydown', onEscClose.bind(instance)) 
+    },
+    onClose: (instance) => {
+      removeEventListener('keydown', onEscClose);
+      }
+    })
+
   instance.show();
+}
+
+function onEscClose(e) {
+  if (e.code === 'Escape') {
+    this.close();
+  }
 }
